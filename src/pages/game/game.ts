@@ -1,24 +1,44 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
+import { TeamHomePage } from '../team-home/team-home';
+import { EliteApi } from '../../providers/elite-api/elite-api';
+import { MapPage } from '../map/map';
 
-/**
- * Generated class for the GamePage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
+declare var window: any;
 
 @Component({
-  selector: 'page-game',
-  templateUrl: 'game.html',
+  templateUrl: 'build/pages/game/game.page.html',
 })
 export class GamePage {
+  game: any;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams) {
+  constructor(
+    private nav: NavController,
+    private navParams: NavParams,
+    private eliteApi: EliteApi) { }
+
+  ionViewLoaded() {
+    this.game = this.navParams.data;
+    this.game.gameTime = Date.parse(this.game.time);
   }
 
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad GamePage');
+  teamTapped(teamId) {
+    let tourneyData = this.eliteApi.getCurrentTourney();
+    let team = tourneyData.teams.find(t => t.id === teamId);
+    this.nav.push(TeamHomePage, team);
   }
 
+  goToDirections() {
+    let tourneyData = this.eliteApi.getCurrentTourney();
+    let location = tourneyData.locations[this.game.locationId];
+    window.location = `geo:${location.latitude},${location.longitude};u=35;`;
+  }
+
+  goToMap() {
+    this.nav.push(MapPage, this.game);
+  }
+
+  isWinner(score1, score2) {
+    return Number(score1) > Number(score2);
+  }
 }

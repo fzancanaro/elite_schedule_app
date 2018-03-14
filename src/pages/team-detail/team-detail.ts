@@ -1,35 +1,35 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, AlertController, ToastController } from 'ionic-angular';
+import { NavController, NavParams, AlertController, ToastController } from 'ionic-angular';
+
 import * as _ from 'lodash';
 import { EliteApi } from '../../providers/elite-api/elite-api';
 import { GamePage } from '../game/game';
 import moment from 'moment';
 import { UserSettings } from '../../providers/user-settings/user-settings';
 
-@IonicPage()
+
 @Component({
-  selector: 'page-team-detail',
-  templateUrl: 'team-detail.html',
+  templateUrl: 'build/pages/team-detail/team-detail.page.html',
 })
 export class TeamDetailPage {
-  private allGames: any[];
-  public dateFilter: string;
-  public isFollowing = false;
-  public team: any = {};
-  public teamStanding: any = {};
-  public games: any[];
+  allGames: any[];
+  dateFilter: string;
+  games: any[];
+  isFollowing = false;
+  team: any;
+  teamStanding: any;
   private tourneyData: any;
-  public useDateFilter = false;
+  useDateFilter = false;
 
   constructor(
     private alertController: AlertController,
-    public navCtrl: NavController,
-    public navParams: NavParams,
+    private nav: NavController,
+    private navParams: NavParams,
     private toastController: ToastController,
-    public eliteApi: EliteApi,
+    private eliteApi: EliteApi,
     private userSettings: UserSettings) { }
 
-  ionViewDidLoad() {
+  ionViewLoaded() {
     this.team = this.navParams.data;
     this.tourneyData = this.eliteApi.getCurrentTourney();
 
@@ -53,23 +53,8 @@ export class TeamDetailPage {
 
     this.allGames = this.games;
     this.teamStanding = _.find(this.tourneyData.standings, { 'teamId': this.team.id });
-
-
-    //this.userSettings.isFavoriteTeam(this.team.id.toString()).then(value => this.isFollowing = value);
     this.userSettings.isFavoriteTeam(this.team.id).then(value => this.isFollowing = value);
-  }
 
-  dateChanged() {
-    if (this.useDateFilter) {
-      this.games = _.filter(this.allGames, g => moment(g.time).isSame(this.dateFilter, 'day'));
-    } else {
-      this.games = this.allGames;
-    }
-  }
-
-  gameClicked($event, game) {
-    let sourceGame = this.tourneyData.games.find(g => g.id === game.gameId);
-    this.navCtrl.parent.parent.push(GamePage, sourceGame);
   }
 
   getScoreDisplay(isTeam1, team1Score, team2Score) {
@@ -84,9 +69,9 @@ export class TeamDetailPage {
     }
   }
 
-  goHome() {
-    console.log('**parent', this.navCtrl.parent, this.navCtrl.parent.parent);
-    this.navCtrl.parent.parent.popToRoot();
+  gameClicked($event, game) {
+    let sourceGame = this.tourneyData.games.find(g => g.id === game.gameId);
+    this.nav.parent.parent.push(GamePage, sourceGame);
   }
 
   getScoreWorL(game) {
@@ -94,20 +79,21 @@ export class TeamDetailPage {
   }
 
   getScoreDisplayBadgeClass(game) {
-    return game.scoreDisplay.indexOf('W:') === 0 ? 'primary' : 'danger';
+    return game.scoreDisplay.indexOf('W:') === 0 ? 'badge-primary' : 'badge-danger';
   }
 
-  refreshAll(refresher) {
-    this.eliteApi.refreshCurrentTourney().subscribe(() => {
-      refresher.complete();
-      this.ionViewDidLoad();
-    });
+  dateChanged() {
+    if (this.useDateFilter) {
+      this.games = _.filter(this.allGames, g => moment(g.time).isSame(this.dateFilter, 'day'));
+    } else {
+      this.games = this.allGames;
+    }
   }
 
   toggleFollow() {
     if (this.isFollowing) {
       let confirm = this.alertController.create({
-        title: 'Unfolow?',
+        title: 'Unfollow?',
         message: 'Are you sure you want to unfollow?',
         buttons: [
           {
@@ -117,7 +103,7 @@ export class TeamDetailPage {
               this.userSettings.unfavoriteTeam(this.team);
 
               let toast = this.toastController.create({
-                message: 'You have unfollwed this team.',
+                message: 'You have unfollowed this team.',
                 duration: 2000,
                 position: 'bottom'
               });
@@ -134,7 +120,14 @@ export class TeamDetailPage {
         this.team,
         this.tourneyData.tournament.id,
         this.tourneyData.tournament.name);
-    }
 
+    }
+  }
+
+  refreshAll(refresher) {
+    this.eliteApi.refreshCurrentTourney().subscribe(() => {
+      refresher.complete();
+      this.ionViewLoaded();
+    });
   }
 }

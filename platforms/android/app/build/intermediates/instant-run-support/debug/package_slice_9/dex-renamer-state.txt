@@ -1,0 +1,4 @@
+#Wed Mar 14 13:41:11 AEDT 2018
+base.0=/Users/fzancanaro/Documents/ionic/elite-schedule-app/platforms/android/app/build/intermediates/transforms/dexMerger/debug/10
+path.0=classes.dex
+renamed.0=classes.dex

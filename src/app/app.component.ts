@@ -4,6 +4,7 @@ import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { MyTeamsPage } from '../pages/my-teams/my-teams';
 import { TournamentsPage } from '../pages/tournaments/tournaments';
+import { UserSettings } from '../providers/user-settings/user-settings';
 
 
 @Component({
@@ -16,11 +17,12 @@ export class MyApp {
 
   pages: Array<{ title: string, component: any }>;
 
-  constructor(public platform: Platform, public statusBar: StatusBar, public splashScreen: SplashScreen) {
+  constructor(
+    public platform: Platform,
+    public statusBar: StatusBar,
+    public splashScreen: SplashScreen,
+    private userSettings: UserSettings) {
     this.initializeApp();
-
-    // used for an example of ngFor and navigation
-
   }
 
   initializeApp() {
@@ -29,6 +31,10 @@ export class MyApp {
       // Here you can do any higher level native things you might need.
       this.statusBar.styleDefault();
       this.splashScreen.hide();
+
+      this.userSettings.initStorage().then(() => {
+        this.rootPage = MyTeamsPage;
+      });
     });
   }
 
